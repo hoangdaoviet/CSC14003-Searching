@@ -5,5 +5,5 @@ problem = Graph('testcases/input.txt')
 problem.toAdjacencyList()
 problem.printGraph('adjacency list')
 
-finder = BFS()
+finder = DFS()
 print(finder.solve(problem))
