@@ -8,7 +8,7 @@ class SearchAlgorithm:
         start = timeit.default_timer()
         result = self.forward(problem)
         end = timeit.default_timer()
-        return result, end - start
+        return result[0], end - start
 
     def forward(self, problem):
         raise NotImplementedError
@@ -22,18 +22,21 @@ class BFS(SearchAlgorithm):
         visited = [False] * problem.numNodes
         visited[start] = True
         prev = [-1] * problem.numNodes
+        foundEnd = False
 
-        while len(queue) != 0:
+        while len(queue)!=0 and not foundEnd:
             node = queue.pop(0)
             neighbors = problem.adjList[node]
             for next in neighbors:
                 if next[0]==problem.end:
                     prev[next[0]] = node
+                    foundEnd = True
                     break
                 if visited[next[0]]==False:
                     queue.append(next[0])
                     visited[next[0]] = True
                     prev[next[0]] = node
+            
         
         trace = problem.end
         path = list()
@@ -41,7 +44,7 @@ class BFS(SearchAlgorithm):
             path.append(trace)
             trace = prev[trace]
         path.reverse()
-        return path
+        return path, queue, visited, prev
 
 class DFS(SearchAlgorithm):
     def forward(self, problem):
@@ -52,13 +55,15 @@ class DFS(SearchAlgorithm):
         visited = [False] * problem.numNodes
         visited[start] = True
         prev = [-1] * problem.numNodes
+        foundEnd = False
 
-        while len(stack) != 0:
+        while len(stack) != 0 and not foundEnd:
             node = stack.pop()
             neighbors = problem.adjList[node]
             for next in neighbors:
                 if next[0]==problem.end:
                     prev[next[0]] = node
+                    foundEnd = True
                     break
                 if visited[next[0]]==False:
                     stack.append(next[0])
@@ -71,7 +76,7 @@ class DFS(SearchAlgorithm):
             path.append(trace)
             trace = prev[trace]
         path.reverse()
-        return path
+        return path, stack, visited, prev
 class UCS(SearchAlgorithm):
     def forward(self, problem):
         pass
