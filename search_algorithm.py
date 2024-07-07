@@ -1,4 +1,5 @@
 import timeit
+from queue import PriorityQueue
 
 class SearchAlgorithm:
     def __init__(self):
@@ -37,7 +38,6 @@ class BFS(SearchAlgorithm):
                     visited[next[0]] = True
                     prev[next[0]] = node
             
-        
         trace = problem.end
         path = list()
         while trace != -1:
@@ -77,6 +77,8 @@ class DFS(SearchAlgorithm):
             trace = prev[trace]
         path.reverse()
         return path, stack, visited, prev
+    
 class UCS(SearchAlgorithm):
     def forward(self, problem):
-        pass
+        start = problem.start
+        pq = PriorityQueue()
