@@ -38,10 +38,10 @@ class BFS(SearchAlgorithm):
             expanded.append(node)
             neighbors = problem.adjList[node]
             for next, _ in neighbors:
-                if next==problem.end:
+                if next == problem.end:
                     prev[next] = node
                     return super().buildPath(prev, problem.end), expanded, queue
-                if visited[next]==False:
+                if visited[next] == False:
                     queue.put(next)
                     visited[next] = True
                     prev[next] = node
@@ -63,10 +63,10 @@ class DFS(SearchAlgorithm):
             expanded.append(node)
             neighbors = problem.adjList[node]
             for next, _ in neighbors:
-                if next==problem.end:
+                if next == problem.end:
                     prev[next] = node
                     return super().buildPath(prev, problem.end), expanded, stack
-                if visited[next]==False: # the mechanism to avoid infinite loop
+                if visited[next] == False: # the mechanism to avoid infinite loop
                     stack.put(next)
                     visited[next] = True
                     prev[next] = node
@@ -74,12 +74,11 @@ class DFS(SearchAlgorithm):
 
 class UCS(SearchAlgorithm):
     def forward(self, problem):
-        start = problem.start
         pq = PriorityQueue()
         expanded = list()
         prev = [-1] * problem.numNodes
 
-        pq[start] = 0
+        pq[problem.start] = 0
         while len(pq) != 0:
             node, cost_node = pq.popitem()
             expanded.append(node)
@@ -95,4 +94,89 @@ class UCS(SearchAlgorithm):
                         pq[next] = cost_node + cost_next
                         prev[next] = node
 
+        return [], expanded, pq
+    
+class DLS(SearchAlgorithm):
+    def forward(self, problem, limit):
+        stack = Stack() # stack for DFS
+        visited = [False] * problem.numNodes
+        expanded = list()
+        prev = [-1] * problem.numNodes
+
+        stack.put((problem.start, 0))
+        visited[problem.start] = True
+
+        while stack.qsize() != 0:
+            node, depth = stack.get()
+            expanded.append(node)
+            neighbors = problem.adjList[node]
+            if depth < limit:
+                for next, _ in neighbors:
+                    if next == problem.end:
+                        prev[next] = node
+                        return super().buildPath(prev, problem.end), expanded, stack
+                    if visited[next] == False:
+                        stack.put((next, depth+1))
+                        visited[next] = True
+                        prev[next] = node
+        return [], expanded, stack
+    
+class IDS(SearchAlgorithm):
+    def __init__(self, MAX_DEPTH_ALLOWED=10):
+        super().__init__()
+        self.MAX_DEPTH_ALLOWED = MAX_DEPTH_ALLOWED
+
+    def forward(self, problem):
+        limit = 0
+        while True:
+            if limit == self.MAX_DEPTH_ALLOWED:
+                break
+            result, expanded, stack = DLS().forward(problem, limit)
+            if len(result) > 0:
+                return result, expanded, stack
+            limit += 1
+        return [], [], []
+    
+class GBFS(SearchAlgorithm):
+    def forward(self, problem):
+        pq = PriorityQueue()
+        expanded = list()
+        prev = [-1] * problem.numNodes
+
+        pq[problem.start] = problem.heuristic[problem.start]
+        while len(pq) != 0:
+            node, _ = pq.popitem()
+            expanded.append(node)
+            if node == problem.end:
+                return super().buildPath(prev, problem.end), expanded, pq
+            neighbors = problem.adjList[node]
+            for next, _ in neighbors:
+                if next not in expanded:
+                    if next not in pq:
+                        pq[next] = problem.heuristic[next]
+                        prev[next] = node
+        return [], expanded, pq
+    
+class AStar(SearchAlgorithm):
+    def forward(self, problem):
+        pq = PriorityQueue()
+        expanded = list()
+        prev = [-1] * problem.numNodes
+
+        pq[problem.start] = problem.heuristic[problem.start]
+        while len(pq) != 0:
+            node, cost_node = pq.popitem()
+            expanded.append(node)
+            if node == problem.end:
+                return super().buildPath(prev, problem.end), expanded, pq
+            cost_node -= problem.heuristic[node] # cost_node now is the actual cost
+            neighbors = problem.adjList[node]
+            for next, cost_next in neighbors:
+                if next not in expanded:
+                    if next not in pq:
+                        pq[next] = cost_node + cost_next + problem.heuristic[next]
+                        prev[next] = node
+                    elif pq[next] > cost_node + cost_next + problem.heuristic[next]:
+                        pq[next] = cost_node + cost_next + problem.heuristic[next]
+                        prev[next] = node
         return [], expanded, pq

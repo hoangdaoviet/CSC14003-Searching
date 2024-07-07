@@ -1,6 +1,10 @@
 class Graph:
     def __init__(self, path):
-        fin = open(path, 'r')
+        try:
+            fin = open(path, 'r')
+        except FileNotFoundError:
+            print('File not found. Exiting.')
+            exit()
 
         self.numNodes = int(fin.readline())
         self.start, self.end = map(int, fin.readline().split())
