@@ -140,22 +140,26 @@ class IDS(SearchAlgorithm):
 class GBFS(SearchAlgorithm):
     def forward(self, problem):
         pq = PriorityQueue()
-        expanded = list()
+        visited = [False] * problem.numNodes 
+        expanded = list() 
         prev = [-1] * problem.numNodes
 
         pq[problem.start] = problem.heuristic[problem.start]
         while len(pq) != 0:
             node, _ = pq.popitem()
             expanded.append(node)
-            if node == problem.end:
-                return super().buildPath(prev, problem.end), expanded, pq
             neighbors = problem.adjList[node]
             for next, _ in neighbors:
-                if next not in expanded:
-                    if next not in pq:
-                        pq[next] = problem.heuristic[next]
-                        prev[next] = node
+                if next == problem.end:
+                    prev[next] = node
+                    return super().buildPath(prev, problem.end), expanded, pq
+                if visited[next] == False:
+                    pq[next] = problem.heuristic[next]
+                    visited[next] = True
+                    prev[next] = node
+                    
         return [], expanded, pq
+
     
 class AStar(SearchAlgorithm):
     def forward(self, problem):
