@@ -1,6 +1,6 @@
 import timeit
-from queue import PriorityQueue
-
+from heapdict import heapdict as PriorityQueue
+from queue import Queue, LifoQueue as Stack
 class SearchAlgorithm:
     def __init__(self):
         pass
@@ -10,75 +10,89 @@ class SearchAlgorithm:
         result = self.forward(problem)
         end = timeit.default_timer()
         return result[0], end - start
+    
+    def buildPath(self, prev, end):
+        trace = end
+        path = list()
+        while trace != -1:
+            path.append(trace)
+            trace = prev[trace]
+        path.reverse()
+        return path
 
     def forward(self, problem):
         raise NotImplementedError
     
 class BFS(SearchAlgorithm):
     def forward(self, problem):
-        start = problem.start
-        queue = list()
-        queue.append(start)
+        queue = Queue() # queue for BFS
+        visited = [False] * problem.numNodes # list of visited nodes
+        expanded = list() # list of expanded nodes
+        prev = [-1] * problem.numNodes # list of previous nodes to trace back the path
 
-        visited = [False] * problem.numNodes
-        visited[start] = True
-        prev = [-1] * problem.numNodes
-        foundEnd = False
+        queue.put(problem.start) # put the starting node to the queue
+        visited[problem.start] = True # mark the starting node as visited
 
-        while len(queue)!=0 and not foundEnd:
-            node = queue.pop(0)
+        while queue.qsize() != 0:
+            node = queue.get()
+            expanded.append(node)
             neighbors = problem.adjList[node]
-            for next in neighbors:
-                if next[0]==problem.end:
-                    prev[next[0]] = node
-                    foundEnd = True
-                    break
-                if visited[next[0]]==False:
-                    queue.append(next[0])
-                    visited[next[0]] = True
-                    prev[next[0]] = node
-            
-        trace = problem.end
-        path = list()
-        while trace != -1:
-            path.append(trace)
-            trace = prev[trace]
-        path.reverse()
-        return path, queue, visited, prev
+            for next, _ in neighbors:
+                if next==problem.end:
+                    prev[next] = node
+                    return super().buildPath(prev, problem.end), expanded, queue
+                if visited[next]==False:
+                    queue.put(next)
+                    visited[next] = True
+                    prev[next] = node
+
+        return [], expanded, queue
 
 class DFS(SearchAlgorithm):
     def forward(self, problem):
-        start = problem.start
-        stack = list()
-        stack.append(start)
+        stack = Stack() # stack for DFS
+        visited = [False] * problem.numNodes # list of visited nodes
+        expanded = list() # list of expanded nodes
+        prev = [-1] * problem.numNodes # list of previous nodes to trace back the path
 
-        visited = [False] * problem.numNodes
-        visited[start] = True
-        prev = [-1] * problem.numNodes
-        foundEnd = False
+        stack.put(problem.start) # put the starting node to the stack
+        visited[problem.start] = True # mark the starting node as visited
 
-        while len(stack) != 0 and not foundEnd:
-            node = stack.pop()
+        while stack.qsize() != 0:
+            node = stack.get()
+            expanded.append(node)
             neighbors = problem.adjList[node]
-            for next in neighbors:
-                if next[0]==problem.end:
-                    prev[next[0]] = node
-                    foundEnd = True
-                    break
-                if visited[next[0]]==False:
-                    stack.append(next[0])
-                    visited[next[0]] = True
-                    prev[next[0]] = node
-        
-        trace = problem.end
-        path = list()
-        while trace != -1:
-            path.append(trace)
-            trace = prev[trace]
-        path.reverse()
-        return path, stack, visited, prev
-    
+            for next, _ in neighbors:
+                if next==problem.end:
+                    prev[next] = node
+                    return super().buildPath(prev, problem.end), expanded, stack
+                if visited[next]==False: # the mechanism to avoid infinite loop
+                    stack.put(next)
+                    visited[next] = True
+                    prev[next] = node
+        return [], expanded, stack
+
 class UCS(SearchAlgorithm):
     def forward(self, problem):
         start = problem.start
         pq = PriorityQueue()
+        expanded = list()
+        prev = [-1] * problem.numNodes
+
+        pq[start] = 0
+        while len(pq) != 0:
+            node, cost_node = pq.popitem()
+            expanded.append(node)
+            if node == problem.end:
+                return super().buildPath(prev, problem.end), expanded, pq
+            neighbors = problem.adjList[node]
+            for next, cost_next in neighbors:
+                if next not in expanded:
+                    if next not in pq:
+                        pq[next] = cost_node + cost_next
+                        prev[next] = node
+                    elif pq[next] > cost_node + cost_next:
+                        pq[next] = cost_node + cost_next
+                        prev[next] = node
+
+        return [], expanded, pq
