@@ -149,6 +149,7 @@ class GBFS(SearchAlgorithm):
         parent = [-1] * problem.numNodes
 
         pq[problem.start] = problem.heuristic[problem.start]
+        visited[problem.start] = True
 
         while len(pq) != 0:
             node, _ = pq.popitem()
