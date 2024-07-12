@@ -1,15 +1,29 @@
 import timeit
 from heapdict import heapdict as PriorityQueue
 from queue import Queue, LifoQueue as Stack
+import tracemalloc
+
 class SearchAlgorithm:
     def __init__(self):
         pass
     
     def solve(self, problem):
+        tracemalloc.start()
+        
         start = timeit.default_timer()
+        before = tracemalloc.take_snapshot()
+
         result = self.forward(problem)
+        
+        after = tracemalloc.take_snapshot()
         end = timeit.default_timer()
-        return result[0], end - start
+
+        stats = after.compare_to(before, 'lineno')
+        tracemalloc.stop()        
+
+        totalMemory = sum([stat.size_diff for stat in stats])
+        totalTime = end - start
+        return result[0], totalTime, totalMemory
     
     def buildPath(self, parent, end):
         trace = end
