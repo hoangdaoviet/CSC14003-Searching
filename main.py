@@ -19,8 +19,7 @@ algorithms = {
     'Hill-climbing': 'SimpleHillClimbing',
     }
 
-with open('output/' + filename, 'w') as f:
-    f.write('')
+
 
 for key in algorithms:
     module = importlib.import_module('search_algorithm')
