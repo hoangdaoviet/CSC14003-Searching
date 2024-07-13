@@ -23,7 +23,7 @@ class SearchAlgorithm:
 
         totalMemory = sum([stat.size_diff for stat in stats])
         totalTime = end - start
-        return result[0], totalTime, totalMemory
+        return result, totalTime, totalMemory
     
     def buildPath(self, parent, end):
         trace = end
@@ -40,69 +40,65 @@ class SearchAlgorithm:
 class BFS(SearchAlgorithm):
     def forward(self, problem):
         queue = Queue() # queue for BFS
-        visited = [False] * problem.numNodes # list of visited nodes
-        expanded = list() # list of expanded nodes
+        explored = [False] * problem.numNodes # mark the explored nodes
         parent = [-1] * problem.numNodes # list of parentious nodes to trace back the path
 
         queue.put(problem.start) # put the starting node to the queue
-        visited[problem.start] = True # mark the starting node as visited
+        explored[problem.start] = True # mark the starting node as explored
 
         while queue.qsize() != 0:
             node = queue.get()
-            expanded.append(node)
             neighbors = problem.adjList[node]
             for next, _ in neighbors:
                 if next == problem.end:
                     parent[next] = node
-                    return super().buildPath(parent, problem.end), expanded, queue
-                if visited[next] == False:
+                    return super().buildPath(parent, problem.end)
+                if explored[next] == False:
                     queue.put(next)
-                    visited[next] = True
+                    explored[next] = True
                     parent[next] = node
 
-        return [], expanded, queue
+        return []
 
 class DFS(SearchAlgorithm):
     def forward(self, problem):
         stack = Stack() # stack for DFS
-        visited = [False] * problem.numNodes # list of visited nodes
-        expanded = list() # list of expanded nodes
+        explored = [False] * problem.numNodes # mark the explored nodes
         parent = [-1] * problem.numNodes # list of parentious nodes to trace back the path
 
         stack.put(problem.start) # put the starting node to the stack
-        visited[problem.start] = True # mark the starting node as visited
+        explored[problem.start] = True # mark the starting node as explored
 
         while stack.qsize() != 0:
             node = stack.get()
-            expanded.append(node)
             neighbors = problem.adjList[node]
             for next, _ in neighbors:
                 if next == problem.end:
                     parent[next] = node
-                    return super().buildPath(parent, problem.end), expanded, stack
-                if visited[next] == False: # the mechanism to avoid infinite loop
+                    return super().buildPath(parent, problem.end)
+                if explored[next] == False: # the mechanism to avoid infinite loop
                     stack.put(next)
-                    visited[next] = True
+                    explored[next] = True
                     parent[next] = node
 
-        return [], expanded, stack
+        return []
 
 class UCS(SearchAlgorithm):
     def forward(self, problem):
         pq = PriorityQueue()
-        expanded = list()
+        expanded = [False] * problem.numNodes
         parent = [-1] * problem.numNodes
 
         pq[problem.start] = 0
 
         while len(pq) != 0:
             node, costNode = pq.popitem()
-            expanded.append(node)
+            expanded[node] = True
             if node == problem.end:
-                return super().buildPath(parent, problem.end), expanded, pq
+                return super().buildPath(parent, problem.end)
             neighbors = problem.adjList[node]
             for next, costNext in neighbors:
-                if next not in expanded:
+                if expanded[next] == False:
                     if next not in pq:
                         pq[next] = costNode + costNext
                         parent[next] = node
@@ -110,33 +106,31 @@ class UCS(SearchAlgorithm):
                         pq[next] = costNode + costNext
                         parent[next] = node
 
-        return [], expanded, pq
+        return []
     
 class DLS(SearchAlgorithm):
     def forward(self, problem, limit):
         stack = Stack() # stack for DFS
-        visited = [False] * problem.numNodes
-        expanded = list()
+        explored = [False] * problem.numNodes
         parent = [-1] * problem.numNodes
 
         stack.put((problem.start, 0))
-        visited[problem.start] = True
+        explored[problem.start] = True
 
         while stack.qsize() != 0:
             node, depth = stack.get()
-            expanded.append(node)
             neighbors = problem.adjList[node]
             if depth < limit:
                 for next, _ in neighbors:
                     if next == problem.end:
                         parent[next] = node
-                        return super().buildPath(parent, problem.end), expanded, stack
-                    if visited[next] == False:
+                        return super().buildPath(parent, problem.end)
+                    if explored[next] == False:
                         stack.put((next, depth+1))
-                        visited[next] = True
+                        explored[next] = True
                         parent[next] = node
 
-        return [], expanded, stack
+        return []
     
 class IDS(SearchAlgorithm):
     def __init__(self, MAX_DEPTH_ALLOWED=10):
@@ -148,56 +142,54 @@ class IDS(SearchAlgorithm):
         while True:
             if limit == self.MAX_DEPTH_ALLOWED:
                 break
-            result, expanded, stack = DLS().forward(problem, limit)
+            result = DLS().forward(problem, limit)
             if len(result) > 0:
-                return result, expanded, stack
+                return result
             limit += 1
 
-        return [], [], []
+        return []
     
 class GBFS(SearchAlgorithm):
     def forward(self, problem):
         pq = PriorityQueue()
-        visited = [False] * problem.numNodes 
-        expanded = list() 
+        explored = [False] * problem.numNodes 
         parent = [-1] * problem.numNodes
 
         pq[problem.start] = problem.heuristic[problem.start]
-        visited[problem.start] = True
+        explored[problem.start] = True
 
         while len(pq) != 0:
             node, _ = pq.popitem()
-            expanded.append(node)
             neighbors = problem.adjList[node]
             for next, _ in neighbors:
                 if next == problem.end:
                     parent[next] = node
-                    return super().buildPath(parent, problem.end), expanded, pq
-                if visited[next] == False:
+                    return super().buildPath(parent, problem.end)
+                if explored[next] == False:
                     pq[next] = problem.heuristic[next]
-                    visited[next] = True
+                    explored[next] = True
                     parent[next] = node
                     
-        return [], expanded, pq
+        return []
 
     
 class AStar(SearchAlgorithm):
     def forward(self, problem):
         pq = PriorityQueue()
-        expanded = list()
+        expanded = [False] * problem.numNodes
         parent = [-1] * problem.numNodes
 
         pq[problem.start] = problem.heuristic[problem.start]
 
         while len(pq) != 0:
             node, costNode = pq.popitem()
-            expanded.append(node)
+            expanded[node] = True
             if node == problem.end:
-                return super().buildPath(parent, problem.end), expanded, pq
+                return super().buildPath(parent, problem.end)
             costNode -= problem.heuristic[node] # costNode now is the actual cost
             neighbors = problem.adjList[node]
             for next, costNext in neighbors:
-                if next not in expanded:
+                if expanded[next] == False:
                     if next not in pq:
                         pq[next] = costNode + costNext + problem.heuristic[next]
                         parent[next] = node
@@ -205,7 +197,7 @@ class AStar(SearchAlgorithm):
                         pq[next] = costNode + costNext + problem.heuristic[next]
                         parent[next] = node
 
-        return [], expanded, pq
+        return []
     
 class SimpleHillClimbing(SearchAlgorithm):
     def forward(self, problem):
@@ -220,11 +212,11 @@ class SimpleHillClimbing(SearchAlgorithm):
             for next, _ in neighbors:
                 if next == problem.end:
                     parent[next] = currentNode
-                    return super().buildPath(parent, problem.end), None, None
+                    return super().buildPath(parent, problem.end)
                 if problem.heuristic[next] < bestHeuristic:
                     bestHeuristic = problem.heuristic[next]
                     bestNode = next
             if bestHeuristic >= problem.heuristic[currentNode]:
-                return [], None, None
+                return []
             parent[bestNode] = currentNode
             currentNode = bestNode
