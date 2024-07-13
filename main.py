@@ -3,8 +3,6 @@ from search_algorithm import *
 from helper_functions import *
 import importlib
 
-typePrint = ['adjacency list', 'adjacency matrix']
-
 print('The input file must be put inside the folder "input".')
 filename = input('Enter the path to the input file: ')
 
