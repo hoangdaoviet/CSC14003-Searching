@@ -1,0 +1,35 @@
+BFS:
+Path: 
+Time in seconds: 0.00019539997447282076
+Memory in KB: 0.609375
+
+DFS:
+Path: 
+Time in seconds: 0.00020699994638562202
+Memory in KB: 0.578125
+
+UCS:
+Path: 
+Time in seconds: 0.00020869995933026075
+Memory in KB: 3.134765625
+
+IDS:
+Path: 
+Time in seconds: 0.000507800024934113
+Memory in KB: 0.5703125
+
+GBFS:
+Path: 
+Time in seconds: 4.290003562346101e-05
+Memory in KB: 0.46875
+
+A*:
+Path: 
+Time in seconds: 9.389995830133557e-05
+Memory in KB: 0.4375
+
+Hill-climbing:
+Path: 
+Time in seconds: 3.0099996365606785e-05
+Memory in KB: 0.40625
+

@@ -99,10 +99,7 @@ class UCS(SearchAlgorithm):
             neighbors = problem.adjList[node]
             for next, costNext in neighbors:
                 if expanded[next] == False:
-                    if next not in pq:
-                        pq[next] = costNode + costNext
-                        parent[next] = node
-                    elif pq[next] > costNode + costNext:
+                    if next not in pq or pq[next] > costNode + costNext:
                         pq[next] = costNode + costNext
                         parent[next] = node
 
@@ -190,10 +187,7 @@ class AStar(SearchAlgorithm):
             neighbors = problem.adjList[node]
             for next, costNext in neighbors:
                 if expanded[next] == False:
-                    if next not in pq:
-                        pq[next] = costNode + costNext + problem.heuristic[next]
-                        parent[next] = node
-                    elif pq[next] > costNode + costNext + problem.heuristic[next]:
+                    if next not in pq or pq[next] > costNode + costNext + problem.heuristic[next]:
                         pq[next] = costNode + costNext + problem.heuristic[next]
                         parent[next] = node
 

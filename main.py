@@ -2,6 +2,7 @@ from graph import *
 from search_algorithm import *
 from helper_functions import *
 import importlib
+import os
 
 print('The input file must be put inside the folder "input".')
 filename = input('Enter the path to the input file: ')
@@ -19,7 +20,11 @@ algorithms = {
     'Hill-climbing': 'SimpleHillClimbing',
     }
 
+if os.path.exists('output/') == False:
+    os.mkdir('output/')
 
+with open('output/' + filename, 'w') as f:
+    f.write('')
 
 for key in algorithms:
     module = importlib.import_module('search_algorithm')
